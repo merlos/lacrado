@@ -11,4 +11,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  resources :messages, only: [:new, :create]
+  get '/:id/:password1', to: 'messages#show', as: :show_message
 end

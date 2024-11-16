@@ -1,0 +1,46 @@
+<h1>Create a secure message</h1>
+<%= form_with url: messages_path, method: :post do |f| %>
+    <div>
+    <label>Message content*:</label>
+    <br>
+    <%= f.text_area :content %>
+    </div>
+    
+    <fieldset>
+    <legend>Secure message options</legend>
+    <p> The message will be destroyed after the selected number of views or the expiration time, whichever comes first. </p>
+    <label>Number of views (Default: 1)*:</label>
+    <%= f.number_field :views_remaining, value: 1, min: 1, max: 50 %>
+    </div>
+    <div>
+    <label>Expiration*:</label>
+    <%= f.select :expiration_time, options_for_select(
+        [
+            ["1 hour", "1_hour"],
+            ["3 hours", "3_hours"],
+            ["6 hours", "6_hours"],
+            ["12 hours", "12_hours"],
+            ["1 day", "1_day"],
+            ["3 days", "3_days"],
+            ["7 days", "7_days"],
+            ["15 days (default)", "15_days"],
+            ["1 month", "1_month"],
+            ["1 year", "1_year"]
+          ], "15_days"), class: "form-select", required: true %>
+    </div>
+    <div>
+    </fieldset>
+    <label>Password (optional)</label>
+    
+    <%= f.password_field :password2, 
+        minlength: 10, 
+        placeholder: "********",
+        maxlength: 64%> 
+        between 10 and 64 characters
+    <div class="invalid-feedback">The password must be between 10 and 64 characters.</div>
+    </div>
+    <div>
+    <%= f.submit "Create Secure Link" %>
+    </div>
+  <% end %>
+  
