@@ -1,46 +1,82 @@
-<h1>Create a secure message</h1>
+<div class="container">
+<h1>New lacrado message</h1>
 <%= form_with url: messages_path, method: :post do |f| %>
     <div>
     <label>Message content*:</label>
-    <br>
-    <%= f.text_area :content %>
-    </div>
-    
-    <fieldset>
-    <legend>Secure message options</legend>
-    <p> The message will be destroyed after the selected number of views or the expiration time, whichever comes first. </p>
-    <label>Number of views (Default: 1)*:</label>
-    <%= f.number_field :views_remaining, value: 1, min: 1, max: 50 %>
+    <%= f.text_area :content, rows:10, maxlength: 65000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
+    <div id="char-counter">0 / <span id="max-chars"></span> characters</div>
     </div>
     <div>
-    <label>Expiration*:</label>
-    <%= f.select :expiration_time, options_for_select(
-        [
-            ["1 hour", "1_hour"],
-            ["3 hours", "3_hours"],
-            ["6 hours", "6_hours"],
-            ["12 hours", "12_hours"],
-            ["1 day", "1_day"],
-            ["3 days", "3_days"],
-            ["7 days", "7_days"],
-            ["15 days (default)", "15_days"],
-            ["1 month", "1_month"],
-            ["1 year", "1_year"]
-          ], "15_days"), class: "form-select", required: true %>
-    </div>
-    <div>
-    </fieldset>
-    <label>Password (optional)</label>
-    
+    <label>Password (optional)</label><br>
     <%= f.password_field :password2, 
-        minlength: 10, 
-        placeholder: "********",
-        maxlength: 64%> 
-        between 10 and 64 characters
-    <div class="invalid-feedback">The password must be between 10 and 64 characters.</div>
+            minlength: 10, 
+            placeholder: "********",
+            maxlength: 64%> 
+            between 10 and 64 characters
     </div>
+    <p id="default-options"><small>by default, the message will be auto-destroyed <strong>after being viewed 1 time or 15 days</strong>, whichever comes first.
+    <br><a href="#" id="show-change-options">change auto-destroy options</a></small></p>
     <div>
-    <%= f.submit "Create Secure Link" %>
+    <fieldset id="change-options">
+        <legend>Message options</legend>
+        <p> The message will be destroyed after the selected number of views or the expiration time, whichever comes first. </p>
+        <div>
+            <label>Destroy the message after viewed*:</label>
+            <%= f.number_field :views_remaining, value: 1, min: 1, max: 50 %> time(s)
+        <div>
+            <label>Expiration*:</label>
+            <%= f.select :expiration_time, options_for_select(
+                [
+                    ["1 hour", "1_hour"],
+                    ["3 hours", "3_hours"],
+                    ["6 hours", "6_hours"],
+                    ["12 hours", "12_hours"],
+                    ["1 day", "1_day"],
+                    ["3 days", "3_days"],
+                    ["7 days", "7_days"],
+                    ["15 days (default)", "15_days"],
+                    ["1 month", "1_month"],
+                    ["1 year", "1_year"]
+                ], "15_days"), class: "form-select", required: true %>
+        </div>
+
+    
+        
+    </fieldset>
+    <%= f.submit "Create Secure Link", class: 'btn btn-primary'%>
     </div>
   <% end %>
   
+  </div> <!-- /container -->
+
+  <script>
+  // Hide show the fieldset 
+  document.getElementById('change-options').style.display = 'none';
+  document.getElementById('show-change-options').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent the default action of the link
+    // Hide the paragraph
+    document.getElementById('default-options').style.display = 'none';
+    // Show the fieldset
+    document.getElementById('change-options').style.display = 'block';
+  });
+
+  const textarea = document.getElementById('message-textarea');
+const maxChars = textarea.getAttribute('maxlength'); // Get the max length from the attribute
+const charCounter = document.getElementById('char-counter');
+
+// Display the max characters in the counter
+document.getElementById('max-chars').textContent = maxChars;
+
+// Update the counter on input
+textarea.addEventListener('input', () => {
+  const currentLength = textarea.value.length;
+
+  // Update the counter display
+  charCounter.textContent = `${currentLength} / ${maxChars} characters`;
+
+  // Optional: Provide visual feedback if near the limit
+  charCounter.style.color = currentLength >= maxChars ? 'red' : 'black';
+});
+
+  
+</script>

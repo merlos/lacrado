@@ -5,6 +5,20 @@ class MessagesController < ApplicationController
         @message = Message.new
     end
   
+    def created
+        puts params[:id]
+        puts session[:password1]
+        # geet message
+        id = params[:id]
+        password1 = session[:password1]
+        @message = Message.find_by(id: params[:id])
+        if @message 
+            @url = "#{request.base_url}/#{id}/#{password1}"
+            render :created
+        end
+    end
+
+
     def create
         password1 = generate_random_string
         message = params[:content]
@@ -20,6 +34,9 @@ class MessagesController < ApplicationController
             render plain: "Password2 must be between 10 and 64 characters long", status: :unprocessable_entity
             return
         end
+        
+        password2_preset = password2.present?
+
 
         encrypted_content = encrypt(message, password1, password2)
         expiration_time = case expiration
@@ -47,20 +64,40 @@ class MessagesController < ApplicationController
         puts "message expiration time",  @message.expiration_time
   
         if @message.save
-            render json: { url: "#{request.base_url}/#{@message.id}/#{password1}" }
+            #render json: { url: "#{request.base_url}/#{@message.id}/#{password1}" }
+            @url = "#{request.base_url}/#{@message.id}/#{password1}"
+
+            session[:password1] = password1
+            redirect_to created_path(@message.id)            
+            return
         else
-            puts "ohhhhh shuts"
+            puts "ohhhhh "
             puts "Error saving message: #{@message.errors.full_messages.join(', ')}"
             render :new, status: :unprocessable_entity
         end
     end
   
-    def show
+    def get_password2
+        id = params[:id]
+        password1 = params[:password1]
+        
+        render :get_password2
+    end
+
+    def decrypt
         @message = Message.find_by(id: params[:id])
         password1 = params[:password1]
         password2 = params[:password2]
   
         if @message
+            # display message to debug
+            puts @message.inspect
+            # first check if password2 is required and not provided
+            if @message.password2_present && password2.blank?
+                redirect_to get_password2_path(id: @message.id, password1: password1)
+                return
+            end
+            # Now decrypt the message
             begin
                 decrypted_content = decrypt(@message.encrypted_content, password1, password2)
                 @message.update(views_remaining: @message.views_remaining - 1)

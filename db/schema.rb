@@ -13,6 +13,7 @@
 ActiveRecord::Schema[8.0].define(version: 2024_11_16_015841) do
   create_table "messages", id: :string, force: :cascade do |t|
     t.text "encrypted_content", null: false
+    t.boolean "password2_present", default: false, null: false
     t.integer "views_remaining", default: 1, null: false
     t.datetime "expiration_time"
     t.datetime "created_at", null: false

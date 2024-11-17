@@ -11,6 +11,22 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  resources :messages, only: [:new, :create]
-  get '/:id/:password1', to: 'messages#show', as: :show_message
+  resources :messages, only: [:new, :create ]
+
+  id_regex = /[\w\-]{10}/   # Matches strings of 10 to 16 characters with letters, numbers, underscores, and dashes
+  password1_regex = /[\w\-]{16}/  # Matches strings of exactly 16 characters with the same character set
+
+  # Displats the created message
+  get '/messages/:id/created', to: 'messages#created', as: :created, constraints: { id: id_regex }
+  
+  # Decrypt the message (if password2 is not needed) otherwise redirect to get_password2 action
+  get '/:id/:password1', to: 'messages#decrypt', as: :decrypt, constraints: { id: id_regex, password1: password1_regex }
+  
+  # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
+  get '/:id/:password1/get_password2', to: 'messages#get_password2', as: :get_password2, constraints: { id: id_regex, password1: password1_regex }
+  
+  # when the user needs to enter password2 a post is sent
+  post '/:id/:password1', to: 'messages#decrypt', constraints: { id: id_regex, password1: password1_regex }
+  
+  
 end

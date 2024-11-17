@@ -1,0 +1,108 @@
+<div class="container">
+
+<h2>Message Created</h2>
+<p>
+  Your secure message has been created successfully! Use the following link to share it:
+</p>
+<div>
+  <h3 class="power-link">
+  <span id="contentToCopy"><%= @url %></span><a href="#" id="copyLink">Copy to Clipboard</a> 
+  </h3>
+</div>
+
+The message will be destroyed after being viewed <strong><%= @message.views_remaining %> times </strong>
+<% if @message.expiration_time %>
+    or <strong><%= format_expiration_time_in_client(@message.expiration_time) %></strong> whichever comes first.
+<% end %>  
+</p>
+<p>
+ 
+</p>
+<div class="text-center mt-4">
+  <a href="/" class="btn btn-primary">Create Another Message</a>
+</div>
+
+</div> <!-- /container -->
+
+<!-- copy to clipboard -->
+<script>
+document.getElementById('copyLink').addEventListener('click', function (event) {
+  event.preventDefault(); // Prevent the default action of the link
+
+  // Get the content of the div
+  const content = document.getElementById('contentToCopy').textContent;
+
+  // Use the Clipboard API to copy the text
+  navigator.clipboard.writeText(content).then(() => {
+    alert('Content copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy content: ', err);
+    alert('Failed to copy content.');
+  });
+});
+</script>
+
+
+<!-- convert the expiration time to the client local time -->
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const elements = document.querySelectorAll(".user-time[data-time]");
+
+  elements.forEach((el) => {
+    const serverTime = el.dataset.time ? new Date(el.dataset.time) : null;
+    const currentTime = new Date();
+
+    // Handle nil case (expiration_time is nil)
+    if (!serverTime) {
+      el.textContent = "Never";
+      return;
+    }
+
+    const timeDiff = serverTime - currentTime;
+    const formattedTime = serverTime.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "numeric",
+    });
+
+    const serverDate = serverTime.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+
+    const yearSuffix = serverTime.getFullYear() !== currentTime.getFullYear() 
+      ? `, ${serverTime.getFullYear()}` 
+      : "";
+
+    let displayText = "";
+
+    if (timeDiff < 0) {
+      // Expired case
+      displayText = "Expired";
+    } else if (timeDiff < 1 * 60 * 60 * 1000) {
+      // Less than 1 hour: show minutes
+      const minutes = Math.round(timeDiff / (60 * 1000));
+      displayText = `in ${minutes} minute${minutes !== 1 ? "s" : ""} at ${formattedTime}`;
+    } else if (timeDiff < 1 * 24 * 60 * 60 * 1000) {
+      // Less than 1 day: show hours
+      const hours = Math.round(timeDiff / (60 * 60 * 1000));
+      displayText = `in ${hours} hour${hours !== 1 ? "s" : ""} at ${formattedTime}`;
+    } else if (timeDiff < 7 * 24 * 60 * 60 * 1000) {
+      // Less than 7 days: show days and weekday
+      const days = Math.round(timeDiff / (24 * 60 * 60 * 1000));
+      const weekday = serverTime.toLocaleDateString(undefined, { weekday: "long" });
+      displayText = `in ${days} day${days !== 1 ? "s" : ""} (${weekday} at ${formattedTime})`;
+    } else if (timeDiff < 365 * 24 * 60 * 60 * 1000) {
+      // Less than 1 year: show full date without year
+      displayText = `on ${serverDate} at ${formattedTime}`;
+    } else {
+      // Over 1 year: include the year
+      displayText = `on ${serverDate}${yearSuffix} at ${formattedTime}`;
+    }
+
+    // Set the formatted text
+    el.textContent = displayText;
+  });
+});
+</script>
