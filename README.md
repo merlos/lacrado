@@ -1,24 +1,46 @@
-# README
+# Lacrado: share self destroying messages links
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Lacrado is a simple web application that allows users to create messages that will be self destroyed either reaching a maximum number of views and/or after an expiration date.
 
-Things you may want to cover:
+The typical use case scenario would be to share a credential via email. Whereas if you send directly the credential, it will be stored in the Inbox permanently, by sending a self destroying message link this can be avoided (and yes, still the receiver can do crazy things...). Messaging tools such as Signal WhatsApp or Telegram support a similar feature, so, this is just an alternative.
 
-* Ruby version
+Lacrado is a simple ruby on rails application.
 
-* System dependencies
+    TODO -- Explain the technicalities of how lacrado works.
+    TODO -- Threat model
 
-* Configuration
+## Development
 
-* Database creation
+```
+git clone https://github.com/merlos/lacrado
 
-* Database initialization
+cd lacrado/
+```
 
-* How to run the test suite
+Launch the service:
 
-* Services (job queues, cache servers, search engines, etc.)
+```
+rails db:migrate
+```
 
-* Deployment instructions
+```
+rails s
+```
 
-* ...
+Open http://localhost:3000
+
+### Tests
+
+If a migration is updated during development
+```sh
+rails db:drop db:create db:migrate
+```
+
+### Deployment
+
+    TODO 
+
+### LICENSE
+
+GPLv3 
+
