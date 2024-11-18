@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   # root "posts#index"
   resources :messages, only: [:new, :create ]
 
-  id_regex = /[\w\-]{10}/   # Matches strings of 10 to 16 characters with letters, numbers, underscores, and dashes
+  id_regex = /[\w\-]{16}/   # Matches strings of 10 to 16 characters with letters, numbers, underscores, and dashes
   password1_regex = /[\w\-]{16}/  # Matches strings of exactly 16 characters with the same character set
 
   # Displats the created message

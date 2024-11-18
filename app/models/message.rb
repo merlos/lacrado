@@ -9,7 +9,7 @@ class Message < ApplicationRecord
     before_create :set_defaults
   
     def set_defaults
-      self.id ||= generate_random_string(10)
+      self.id ||= generate_random_string(16)
     end
   
     def self.auto_delete_expired
