@@ -6,11 +6,10 @@ class MessagesController < ApplicationController
     end
   
     def created
-        puts params[:id]
-        puts session[:password1]
-        # geet message
         id = params[:id]
         password1 = session[:password1]
+        # clear the password1 from the session
+        session[:password1] = nil
         @message = Message.find_by(id: params[:id])
         if @message 
             @url = "#{request.base_url}/#{id}/#{password1}"
