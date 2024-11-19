@@ -1,36 +1,37 @@
 <div class="container">
 
-<h2>Message Created</h2>
+<h2 class="success">Self destroying message created</h2>
 <p>
-  Your secure message has been created successfully! Use the following link to share it:
+  Share this link with the recipient:
 </p>
-<div>
+<div class="power-link-container">
   <h3 class="power-link">
-  <span id="contentToCopy"><%= @url %></span><a href="#" id="copyLink">Copy to Clipboard</a> 
+    <span id="content-to-copy"><%= @url %></span>
+    <a href="#" id="copy-link">📋 Copy to Clipboard</a>
   </h3>
 </div>
-
-The message will be destroyed after being viewed <strong><%= @message.views_remaining %> times </strong>
-<% if @message.expiration_time %>
-    or <strong><%= format_expiration_time_in_client(@message.expiration_time) %></strong> whichever comes first.
-<% end %>  
-</p>
 <p>
- 
-</p>
-<div class="text-center mt-4">
-  <a href="/" class="btn btn-primary">Create Another Message</a>
+It will be destroyed <strong class="highlight">after being viewed <%= @message.views_remaining %> time(s)</strong>
+<% if @message.expiration_time %>
+    or <strong class="highlight"><%= format_expiration_time_in_client(@message.expiration_time) %></strong> whichever comes first.
+<% end %>  
+</span></p>
+
+<p><small>The contents of the message have been encrypted and the only way to view the message is with the link.</small></p>
+<div>
+  <%= link_to 'Create New Message', new_message_path, class: "btn btn-primary" %>
 </div>
+
 
 </div> <!-- /container -->
 
 <!-- copy to clipboard -->
 <script>
-document.getElementById('copyLink').addEventListener('click', function (event) {
+document.getElementById('copy-link').addEventListener('click', function (event) {
   event.preventDefault(); // Prevent the default action of the link
 
   // Get the content of the div
-  const content = document.getElementById('contentToCopy').textContent;
+  const content = document.getElementById('content-to-copy').textContent;
 
   // Use the Clipboard API to copy the text
   navigator.clipboard.writeText(content).then(() => {
