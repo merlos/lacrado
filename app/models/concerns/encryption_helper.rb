@@ -8,7 +8,7 @@ module EncryptionHelper
       Array.new(length) { chars[SecureRandom.random_number(chars.size)] }.join
     end
   
-    def encrypt(message, password1, password2 = nil)
+    def encryptor(message, password1, password2 = nil)
       salt = SecureRandom.random_bytes(16)
       key = derive_key(password1, password2, salt)
       iv = SecureRandom.random_bytes(12)
@@ -21,10 +21,10 @@ module EncryptionHelper
       Base64.encode64(salt + iv + encrypted_message + tag)
     end
   
-    def decrypt(encrypted_message, password1, password2 = nil)
+    def decryptor(encrypted_message, password1, password2 = nil)
       encrypted_data = Base64.decode64(encrypted_message)
-      salt = encrypted_data[0, 16]
-      iv = encrypted_data[16, 28]
+      salt = encrypted_data[0..15]
+      iv = encrypted_data[16..27] 
       ciphertext = encrypted_data[28..-17]
       tag = encrypted_data[-16..]
       key = derive_key(password1, password2, salt)
@@ -33,7 +33,8 @@ module EncryptionHelper
       cipher.key = key
       cipher.iv = iv
       cipher.auth_tag = tag
-      cipher.update(ciphertext) + cipher.final
+      result = cipher.update(ciphertext) + cipher.final
+      return result
     end
   
     private
