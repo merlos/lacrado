@@ -7,6 +7,10 @@ class MessagesController < ApplicationController
   
     def created
         id = params[:id]
+        if session[:password1].nil?
+            redirect_to new_message_path
+            return
+        end
         password1 = session[:password1]
         # clear the password1 from the session
         session[:password1] = nil
