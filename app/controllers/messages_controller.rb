@@ -38,7 +38,7 @@ class MessagesController < ApplicationController
         password2_preset = password2.present?
 
 
-        encrypted_content = encrypt(message, password1, password2)
+        encrypted_content = encryptor(message, password1, password2)
         expiration_time = case expiration
                         when "1_hour" then 1.hour.from_now
                         when "3_hours" then 3.hours.from_now
@@ -92,6 +92,7 @@ class MessagesController < ApplicationController
         if @message
             # display message to debug
             puts @message.inspect
+            puts "Needs password2?", @message.password2_present
             # first check if password2 is required and not provided
             if @message.password2_present && password2.blank?
                 redirect_to get_password2_path(id: @message.id, password1: password1)
@@ -99,9 +100,9 @@ class MessagesController < ApplicationController
             end
             # Now decrypt the message
             begin
-                decrypted_content = decrypt(@message.encrypted_content, password1, password2)
-                @message.update(views_remaining: @message.views_remaining - 1)
-                @message.destroy if @message.views_remaining <= 0
+                decrypted_content = decryptor(@message.encrypted_content, password1, password2)
+                #@message.update(views_remaining: @message.views_remaining - 1)
+                #@message.destroy if @message.views_remaining <= 0
                 render plain: decrypted_content
             rescue
                 render plain: "Invalid password", status: :unauthorized
