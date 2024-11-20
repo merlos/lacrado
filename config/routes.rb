@@ -10,7 +10,8 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "home#index"
+  
   resources :messages, only: [:new, :create ]
 
   id_regex = /[\w\-]{16}/   # Matches strings of 10 to 16 characters with letters, numbers, underscores, and dashes
@@ -19,14 +20,16 @@ Rails.application.routes.draw do
   # Displats the created message
   get '/messages/:id/created', to: 'messages#created', as: :created, constraints: { id: id_regex }
   
-  # Decrypt the message (if password2 is not needed) otherwise redirect to get_password2 action
-  get '/:id/:password1', to: 'messages#decrypt', as: :decrypt, constraints: { id: id_regex, password1: password1_regex }
-  
   # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
-  get '/:id/:password1/get_password2', to: 'messages#get_password2', as: :get_password2, constraints: { id: id_regex, password1: password1_regex }
+  get '/:id/:password1/get_password2', to: 'messages#get_password2', constraints: { id: id_regex, password1: password1_regex }, as: :get_password2
   
+
   # when the user needs to enter password2 a post is sent
-  post '/:id/:password1', to: 'messages#decrypt', constraints: { id: id_regex, password1: password1_regex }
+  match '/:id/:password1', to: 'messages#decrypt', via: [:get, :post], constraints: { id: id_regex, password1: password1_regex }, as: :decrypt
+
+  # Decrypt the message (if password2 is not needed) otherwise redirect to get_password2 action
+  #get '/:id/:password1', to: 'messages#decrypt', as: :decrypt, constraints: { id: id_regex, password1: password1_regex }
+  
   
   
 end
