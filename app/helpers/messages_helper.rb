@@ -1,16 +1,16 @@
 module MessagesHelper
     def format_expiration_time_in_server(expiration_time)
       return "Never" if expiration_time.nil?
-  
+
       # Convert expiration time to local time
       local_time = expiration_time.localtime
       time_diff = local_time - Time.current
-  
+
       # Helper methods for context
       formatted_time = local_time.strftime("%-I:%M %p")
       day_name = local_time.to_date == Date.current + 1 ? "tomorrow" : local_time.strftime("%A")
       year_format = local_time.year == Time.current.year ? "" : ", %Y"
-  
+
       # Determine the human-readable string
       case time_diff
       when 0...1.hour
@@ -34,6 +34,5 @@ module MessagesHelper
         return "Never" if expiration_time.nil?
         # Pass the ISO8601 string to be handled by JavaScript
         content_tag(:span, "", data: { time: expiration_time.iso8601 }, class: "user-time")
-      end
-  end
-  
+    end
+end
