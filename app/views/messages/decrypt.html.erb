@@ -3,7 +3,7 @@
     <% if @message.views_remaining > 0 %>
         <p>Note that  message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong></strong>.</p>
     <% else %>
-        <p>Note that <strong class="alert-error">this message has been destroyed</strong> and cannot longer be retrieved with the link.</p>
+        <p><strong class="alert-error">This message has been self-destroyed</strong>. The link won't work anymore. Please, save in a secure way any important information from this message.</p>
     <% end %>
     <p class="power-link-container">
     <%= @decrypted_content %></p>
