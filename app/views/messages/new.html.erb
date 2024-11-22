@@ -1,11 +1,13 @@
 <div class="container">
-<h1>New lacrado message</h1>
+<h1>New lacrado self-destroying message</h1>
 <%= form_with url: messages_path, method: :post do |f| %>
     <div>
     <label>Message content*:</label>
-    <%= f.text_area :content, rows:10, required: true,  maxlength: 65000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
-    <div id="char-counter">0 / <span id="max-chars"></span> characters</div>
+    <%= f.text_area :content, rows:10, required: true,  maxlength: 1000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
+    <div><span id="char-counter">0</span> / <span id="max-chars"></span> characters</div>
+    <br>
     </div>
+    
     <div>
     <label>Password (optional)</label><br>
     <%= f.password_field :password2, 
@@ -13,8 +15,9 @@
             placeholder: "********",
             maxlength: 64%> 
             between 10 and 64 characters
-    </div>
-    <p id="default-options"><small>by default, the message will be auto-destroyed <strong>after being viewed 1 time or 15 days</strong>, whichever comes first.
+    
+            </div>
+    <p id="default-options"><small>by default, the message will be self-destroyed <strong>after being viewed 1 time or 3 days</strong>, whichever comes first.
     <br><a href="#" id="show-change-options">change auto-destroy options</a></small></p>
     <div>
     <fieldset id="change-options" style="display:none">
@@ -32,12 +35,12 @@
                     ["6 hours", "6_hours"],
                     ["12 hours", "12_hours"],
                     ["1 day", "1_day"],
-                    ["3 days", "3_days"],
+                    ["3 days (default)", "3_days"],
                     ["7 days", "7_days"],
-                    ["15 days (default)", "15_days"],
+                    ["15 days", "15_days"],
                     ["1 month", "1_month"],
                     ["1 year", "1_year"]
-                ], "15_days"), class: "form-select", required: true %>
+                ], "3_days"), class: "form-select", required: true %>
         </div>
 
     
@@ -59,25 +62,28 @@
     // Show the fieldset
     document.getElementById('change-options').style.display = 'block';
   });
-  # check if messageTextarea const has been defined
-  if (! messageTextarea) { 
-  const messageTextarea = document.getElementById('message-textarea');
-  const maxChars = messageTextarea.getAttribute('maxlength'); // Get the max length from the attribute
-  const charCounter = document.getElementById('char-counter');
 
-  // Display the max characters in the counter
-  document.getElementById('max-chars').textContent = maxChars;
+  function formatInt(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  // only if not previously defined
+  if (typeof messageTextarea == 'undefined') {
+    const messageTextarea = document.getElementById('message-textarea');
+    const maxChars = messageTextarea.getAttribute('maxlength'); // Get the max length from the attribute
+    const charCounter = document.getElementById('char-counter');
 
-  // Update the counter on input
-  messageTextarea.addEventListener('input', () => {
-  const currentLength = messageTextarea.value.length;
+    // Display the max characters in the counter
+    document.getElementById('max-chars').textContent = formatInt(maxChars);
 
-  // Update the counter display
-  charCounter.textContent = `${currentLength} / ${maxChars} characters`;
-
-  // Optional: Provide visual feedback if near the limit
-  charCounter.style.color = currentLength >= maxChars ? 'red' : 'black';
-});
+    // Update the counter on input
+    messageTextarea.addEventListener('input', () => {
+      const currentLength = messageTextarea.value.length;
+      // Update the counter display
+      charCounter.textContent = formatInt(currentLength);
+      // Change the color to red if the user is over the 90%
+      charCounter.style.color = currentLength >= (maxChars*0.9) ? 'red' : 'black';
+    });
   }
   
 </script>
