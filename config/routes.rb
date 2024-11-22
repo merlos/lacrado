@@ -11,27 +11,21 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
-  
-  resources :messages, only: [:new, :create ]
+
+  resources :messages, only: [ :new, :create ]
 
   id_regex = /[\w\-]{16}/   # Matches strings of 10 to 16 characters with letters, numbers, underscores, and dashes
   password1_regex = /[\w\-]{16}/  # Matches strings of exactly 16 characters with the same character set
 
   # Displats the created message
-  get '/messages/:id/created', to: 'messages#created', as: :created, constraints: { id: id_regex }
-  
-  # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
-  get '/:id/:password1/get_password2', to: 'messages#get_password2', constraints: { id: id_regex, password1: password1_regex }, as: :get_password2
-  
-  # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
-  get '/:id/:password1/decrypted', to: 'messages#decrypted', constraints: { id: id_regex, password1: password1_regex }, as: :decrypted
-  
-  # when the user needs to enter password2 a post is sent
-  match '/:id/:password1', to: 'messages#decrypt', via: [:get, :post], constraints: { id: id_regex, password1: password1_regex }, as: :decrypt
+  get "/messages/:id/created", to: "messages#created", as: :created, constraints: { id: id_regex }
 
-  # Decrypt the message (if password2 is not needed) otherwise redirect to get_password2 action
-  #get '/:id/:password1', to: 'messages#decrypt', as: :decrypt, constraints: { id: id_regex, password1: password1_regex }
-  
-  
-  
+  # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
+  get "/:id/:password1/get_password2", to: "messages#get_password2", constraints: { id: id_regex, password1: password1_regex }, as: :get_password2
+
+  # If the user needs to enter password2, messages#decrypt redirects to the get_password2 action
+  get "/:id/:password1/decrypted", to: "messages#decrypted", constraints: { id: id_regex, password1: password1_regex }, as: :decrypted
+
+  # when the user needs to enter password2 a post is sent
+  match "/:id/:password1", to: "messages#decrypt", via: [ :get, :post ], constraints: { id: id_regex, password1: password1_regex }, as: :decrypt
 end
