@@ -47,7 +47,6 @@ document.getElementById('copy-link').addEventListener('click', function (event) 
 <!-- convert the expiration time to the client local time -->
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
   const elements = document.querySelectorAll(".user-time[data-time]");
 
   elements.forEach((el) => {
@@ -105,5 +104,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set the formatted text
     el.textContent = displayText;
   });
-});
 </script>

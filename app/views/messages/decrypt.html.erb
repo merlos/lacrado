@@ -1,0 +1,11 @@
+<div class="container">
+    <h1>lacrado message</h1>
+    <% if @message.views_remaining > 0 %>
+        <p>Note that  message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong></strong>.</p>
+    <% else %>
+        <p>Note that <strong class="alert-error">this message has been destroyed</strong> and cannot longer be retrieved with the link.</p>
+    <% end %>
+    <p class="power-link-container">
+    <%= @decrypted_content %></p>
+    <!-- if number of views is greater than 0, show the number of views othewise show the message has been destroyed -->
+</div>

@@ -3,7 +3,7 @@
 <%= form_with url: messages_path, method: :post do |f| %>
     <div>
     <label>Message content*:</label>
-    <%= f.text_area :content, rows:10, maxlength: 65000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
+    <%= f.text_area :content, rows:10, required: true,  maxlength: 65000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
     <div id="char-counter">0 / <span id="max-chars"></span> characters</div>
     </div>
     <div>
@@ -17,7 +17,7 @@
     <p id="default-options"><small>by default, the message will be auto-destroyed <strong>after being viewed 1 time or 15 days</strong>, whichever comes first.
     <br><a href="#" id="show-change-options">change auto-destroy options</a></small></p>
     <div>
-    <fieldset id="change-options">
+    <fieldset id="change-options" style="display:none">
         <legend>Message options</legend>
         <p> The message will be destroyed after the selected number of views or the expiration time, whichever comes first. </p>
         <div>
@@ -59,17 +59,18 @@
     // Show the fieldset
     document.getElementById('change-options').style.display = 'block';
   });
+  # check if messageTextarea const has been defined
+  if (! messageTextarea) { 
+  const messageTextarea = document.getElementById('message-textarea');
+  const maxChars = messageTextarea.getAttribute('maxlength'); // Get the max length from the attribute
+  const charCounter = document.getElementById('char-counter');
 
-  const textarea = document.getElementById('message-textarea');
-const maxChars = textarea.getAttribute('maxlength'); // Get the max length from the attribute
-const charCounter = document.getElementById('char-counter');
+  // Display the max characters in the counter
+  document.getElementById('max-chars').textContent = maxChars;
 
-// Display the max characters in the counter
-document.getElementById('max-chars').textContent = maxChars;
-
-// Update the counter on input
-textarea.addEventListener('input', () => {
-  const currentLength = textarea.value.length;
+  // Update the counter on input
+  messageTextarea.addEventListener('input', () => {
+  const currentLength = messageTextarea.value.length;
 
   // Update the counter display
   charCounter.textContent = `${currentLength} / ${maxChars} characters`;
@@ -77,6 +78,6 @@ textarea.addEventListener('input', () => {
   // Optional: Provide visual feedback if near the limit
   charCounter.style.color = currentLength >= maxChars ? 'red' : 'black';
 });
-
+  }
   
 </script>

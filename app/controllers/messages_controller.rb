@@ -38,9 +38,6 @@ class MessagesController < ApplicationController
             return
         end
         
-        password2_preset = password2.present?
-
-
         encrypted_content = encryptor(message, password1, password2)
         expiration_time = case expiration
                         when "1_hour" then 1.hour.from_now
@@ -58,10 +55,14 @@ class MessagesController < ApplicationController
         puts "expiration_time: #{expiration_time}"
         puts encrypted_content
         puts views
+        puts "has password2?"
+        puts password2.present?
+
         @message = Message.new(
             encrypted_content: encrypted_content,
             expiration_time: expiration_time,
-            views_remaining: views
+            views_remaining: views,
+            password2_present: password2.present?
         )
     
         puts "message expiration time",  @message.expiration_time
@@ -74,17 +75,47 @@ class MessagesController < ApplicationController
             redirect_to created_path(@message.id)            
             return
         else
-            puts "ohhhhh "
             puts "Error saving message: #{@message.errors.full_messages.join(', ')}"
             render :new, status: :unprocessable_entity
         end
     end
   
     def get_password2
-        id = params[:id]
-        password1 = params[:password1]
-        
+        @id = params[:id]
+        @password1 = params[:password1]
         render :get_password2
+    end
+
+    def decrypted
+        @message = Message.find_by(id: params[:id])
+        password1 = params[:password1]
+        if @message
+            # ensure password2 is required
+            if not @message.password2_present
+                redirect_to decrypt_path(id: @message.id, password1: password1)
+                return
+            end 
+            # ensure password2 has been previously stored in the session
+            if not session[:password2].present?
+                redirect_to get_password2_path(id: @message.id, password1: password1)
+                return
+            end
+            password2 = session[:password2]
+            # clear the password2 from the session
+            session[:password2] = nil
+            # now try to decrtpy
+            begin
+                puts "decrypting message ** decrypted"
+                @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
+                render :decrypt 
+                return
+            rescue StandardError => e
+                flash[:error] = "Incorrect password"
+                redirect_to get_password2_path(id: @message.id, password1: password1)
+            end
+        else
+            render plain: "Message not found", status: :not_found
+        end
     end
 
     def decrypt
@@ -95,20 +126,32 @@ class MessagesController < ApplicationController
         if @message
             # display message to debug
             puts @message.inspect
-            puts "Needs password2?", @message.password2_present
-            # first check if password2 is required and not provided
-            if @message.password2_present && password2.blank?
+            puts "Needs password2 & password2 present?", @message.password2_present, password2.present?
+            
+            # First check if password2 is required and not present
+            if @message.password2_present && !password2.present?
                 redirect_to get_password2_path(id: @message.id, password1: password1)
                 return
             end
+            
             # Now decrypt the message
             begin
-                decrypted_content = decryptor(@message.encrypted_content, password1, password2)
+                puts "decrypting message"
+                @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
                 #@message.update(views_remaining: @message.views_remaining - 1)
                 #@message.destroy if @message.views_remaining <= 0
-                render plain: decrypted_content
-            rescue
-                render plain: "Invalid password", status: :unauthorized
+                if password2.present?
+                    session[:password2] = password2
+                    redirect_to decrypted_path(id: @message.id, password1: password1)
+                    return
+                end
+                render :decrypt
+                return
+            rescue StandardError => e
+                puts "Decryption failed: #{e.message}"
+                puts "Ohhhh nooo!!!"
+                flash[:error] = "Incorrect password"
+                redirect_to get_password2_path(id: @message.id, password1: password1)
             end
         else
             render plain: "Message not found", status: :not_found
