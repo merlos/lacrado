@@ -50,13 +50,8 @@ class MessagesController < ApplicationController
                         when "1_month" then 1.month.from_now
                         when "1_year" then 1.year.from_now
                         when "never" then nil 
-                        else 15.days.from_now
+                        else 3.days.from_now
                         end
-        puts "expiration_time: #{expiration_time}"
-        puts encrypted_content
-        puts views
-        puts "has password2?"
-        puts password2.present?
 
         @message = Message.new(
             encrypted_content: encrypted_content,
@@ -64,18 +59,13 @@ class MessagesController < ApplicationController
             views_remaining: views,
             password2_present: password2.present?
         )
-    
-        puts "message expiration time",  @message.expiration_time
   
         if @message.save
-            #render json: { url: "#{request.base_url}/#{@message.id}/#{password1}" }
-            @url = "#{request.base_url}/#{@message.id}/#{password1}"
-
             session[:password1] = password1
             redirect_to created_path(@message.id)            
             return
         else
-            puts "Error saving message: #{@message.errors.full_messages.join(', ')}"
+            #puts "Error saving message: #{@message.errors.full_messages.join(', ')}"
             render :new, status: :unprocessable_entity
         end
     end
@@ -105,8 +95,9 @@ class MessagesController < ApplicationController
             session[:password2] = nil
             # now try to decrtpy
             begin
-                puts "decrypting message ** decrypted"
                 @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
+                @message.update(views_remaining: @message.views_remaining - 1)
+                @message.destroy if @message.views_remaining <= 0
                 render :decrypt 
                 return
             rescue StandardError => e
@@ -125,8 +116,8 @@ class MessagesController < ApplicationController
   
         if @message
             # display message to debug
-            puts @message.inspect
-            puts "Needs password2 & password2 present?", @message.password2_present, password2.present?
+            #puts @message.inspect
+            #puts "Needs password2 & password2 present?", @message.password2_present, password2.present?
             
             # First check if password2 is required and not present
             if @message.password2_present && !password2.present?
@@ -136,20 +127,19 @@ class MessagesController < ApplicationController
             
             # Now decrypt the message
             begin
-                puts "decrypting message"
                 @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
-                #@message.update(views_remaining: @message.views_remaining - 1)
-                #@message.destroy if @message.views_remaining <= 0
+                #
                 if password2.present?
                     session[:password2] = password2
                     redirect_to decrypted_path(id: @message.id, password1: password1)
                     return
                 end
+                @message.update(views_remaining: @message.views_remaining - 1)
+                @message.destroy if @message.views_remaining <= 0
+                #puts @message.created_at 
                 render :decrypt
                 return
             rescue StandardError => e
-                puts "Decryption failed: #{e.message}"
-                puts "Ohhhh nooo!!!"
                 flash[:error] = "Incorrect password"
                 redirect_to get_password2_path(id: @message.id, password1: password1)
             end
