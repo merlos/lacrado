@@ -39,6 +39,7 @@ body {
     text-decoration: none;
     display: inline-block;
     margin: 0.5rem;
+    margin-left: 0.0rem;
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s;
