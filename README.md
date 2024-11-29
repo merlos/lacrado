@@ -1,6 +1,6 @@
-# Lacrado: share self destroying messages links
+# Lacrado: share self-destroying messages
 
-Lacrado is a simple web application that allows users to create messages that will be self destroyed either reaching a maximum number of views and/or after an expiration date.
+Lacrado is a simple web application that allows users to create messages that will be self destroyed after reaching a maximum number of views (1 by default) and/or after an expiration date (3 days).
 
 The typical use case scenario would be to share a credential via email. Whereas if you send directly the credential, it will be stored in the Inbox permanently, by sending a self destroying message link this can be avoided (and yes, still the receiver can do crazy things...). Messaging tools such as Signal WhatsApp or Telegram support a similar feature, so, this is just an alternative.
 
