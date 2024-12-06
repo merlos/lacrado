@@ -11,13 +11,20 @@
 
 /** General Styles **/
 
+
 body {
     font-family: 'Arial', sans-serif;
     background-color: #fcfcfc;
     color: #333;
     margin: 0;
     padding: 0;
+    /* add paper style background 
+    source https://www.transparenttextures.com/patterns/paper.png
+    */
+    background-image: url('/paper.png');
+
 }
+
 
 .success {
     color: green;
@@ -206,7 +213,7 @@ fieldset {
 
 /* Styles for the container */
 .power-link-container {
-   background-color: #eaeaea; /* Light gray background */
+   background-color: #fff; 
    padding: 1rem;
    border-radius: 0.5rem; /* Rounded corners */
    /* drop shadow */
