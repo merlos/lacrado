@@ -11,7 +11,7 @@ class Message < ApplicationRecord
     before_create :set_defaults
 
     def set_defaults
-      self.id ||= generate_random_string(16)
+      self.id ||= generate_unique_id
     end
 
     def self.auto_delete_expired
@@ -35,6 +35,13 @@ class Message < ApplicationRecord
     def expiration_time_within_limit
       if expiration_time.present? && expiration_time > Time.current + MAX_ALLOWED_TIME
         errors.add(:expiration_time, "must be within #{MAX_ALLOWED_TIME.inspect} from now")
+      end
+    end
+
+    def generate_unique_id
+      loop do
+        random_id = generate_random_string(16)
+        break random_id unless Message.exists?(id: random_id)
       end
     end
 end
