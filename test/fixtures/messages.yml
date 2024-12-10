@@ -4,10 +4,10 @@ one:
   encrypted_content: MyText
   views_remaining: 1
   expiration_time: 2024-11-16 04:58:41
-  id: MyString
+  id: first
 
 two:
   encrypted_content: MyText
   views_remaining: 1
   expiration_time: 2024-11-16 04:58:41
-  id: MyString
+  id: two
