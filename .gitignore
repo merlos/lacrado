@@ -32,3 +32,9 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# ignore coverage
+/coverage
+
+# Ignore Mac system files
+.DS_Store
