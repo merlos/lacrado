@@ -35,3 +35,6 @@
 
 # ignore coverage
 /coverage
+
+# Ignore Mac system files
+.DS_Store
