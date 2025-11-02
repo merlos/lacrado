@@ -1,22 +1,24 @@
-<div class="container">
+<div class="container" data-controller="message">
 <h1>New lacrado self-destroying message</h1>
-<%= form_with url: messages_path, method: :post do |f| %>
+<%= form_with url: messages_path, method: :post, format: :html, data: { message_target: "form", turbo: false, action: "submit->message#create" } do |f| %>
     <div>
     <label>Message content*:</label>
-    <%= f.text_area :content, rows:10, required: true,  maxlength: 1000, placeholder: "Type your self-destroying message...", id: "message-textarea" %>
+    <!-- content is intentionally NOT a named form input so it is NOT submitted to the server -->
+    <textarea rows="10" required maxlength="1000" placeholder="Type your secure message here..." data-message-target="content" id="message-textarea"></textarea>
     <div><span id="char-counter">0</span> / <span id="max-chars"></span> characters</div>
     <br>
     </div>
     
-    <div>
-    <label>Password (optional)</label><br>
-    <%= f.password_field :password2, 
-            minlength: 10, 
-            placeholder: "********",
-            maxlength: 64%> 
-            between 10 and 64 characters
-    
-            </div>
+  <div>
+  <label>Password (optional)</label><br>
+  <!-- password2 is intentionally not a named form input so it is NOT submitted to the server -->
+  <input type="password" minlength="10" placeholder="********" maxlength="64" data-message-target="password2" id="password2-input">
+  between 10 and 64 characters
+
+  <!-- hidden flag that indicates whether a password2 was provided (sent to server) -->
+  <%= f.hidden_field :password2_present, value: false, data: { message_target: "password2Present" } %>
+
+  </div>
     <p id="default-options"><small>by default, the message will be self-destroyed <strong>after being viewed 1 time or 3 days</strong>, whichever comes first.
     <br><a href="#" id="show-change-options">change auto-destroy options</a></small></p>
     <div>
@@ -46,7 +48,9 @@
     
         
     </fieldset>
-    <%= f.submit "Create Secure Link", class: 'btn btn-primary'%>
+    <%= f.hidden_field :encrypted_content, data: { message_target: "encryptedContent" } %>
+    <%= f.hidden_field :password1, data: { message_target: "password1" } %>
+    <%= f.submit "Create Secure Link", class: 'btn btn-primary' %>
     </div>
   <% end %>
   

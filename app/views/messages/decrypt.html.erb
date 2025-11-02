@@ -1,11 +1,32 @@
-<div class="container">
+<div class="container" data-controller="message">
     <h1>lacrado message</h1>
-    <% if @message.views_remaining > 0 %>
-        <p>Note that  message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong></strong>.</p>
+    
+<% if @message && @message.views_remaining > 1 %>
+        <p>Note that message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>.</p>
+<% else %>
+        <p>The message will be <strong>deleted after decrypting</strong>. You can decrypt it until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>.</p>
+<% end %>
+<% if @message && @message.views_remaining > 0 %>
+    
+        <div data-message-target="decryptedContent" style="display: none;"></div>
+
+                <!-- If password2 is present, the client will ask for it and decrypt locally; password2 is never submitted to the server -->
+                <div>
+                    <% if @message.password2_present %>
+                        <label>Password*:</label>
+                        <br>
+                        <input type="password" minlength="10" placeholder="**********" maxlength="64" required data-message-target="password2Input" id="decrypt-password2">
+                        <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
+                    <% else %>
+                        <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
+                    <% end %>
+                </div>
+
+    <input type="hidden" data-message-target="encryptedContent" value="<%= @encrypted_content %>">
+    <input type="hidden" data-message-target="password1" value="<%= @password1 %>">
+    <input type="hidden" id="message-id" value="<%= @message.id %>">
+
     <% else %>
         <p><strong class="alert-error">This message has been self-destroyed</strong>. The link won't work anymore. Please, save in a secure way any important information from this message.</p>
     <% end %>
-    <p class="power-link-container">
-    <%= @decrypted_content %></p>
-    <!-- if number of views is greater than 0, show the number of views othewise show the message has been destroyed -->
 </div>
