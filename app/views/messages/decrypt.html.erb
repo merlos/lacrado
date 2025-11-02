@@ -11,7 +11,7 @@
         <div data-message-target="decryptedContent" style="display: none;"></div>
 
                 <!-- If password2 is present, the client will ask for it and decrypt locally; password2 is never submitted to the server -->
-                <div>
+                <div data-message-target="decryptForm">
                     <% if @message.password2_present %>
                         <label>Password*:</label>
                         <br>

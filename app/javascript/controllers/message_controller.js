@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import EncryptionHelper from "libs/encryption_helper"
 
 export default class extends Controller {
-  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent", "password2Present"]
+  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent", "password2Present", "decryptForm"]
 
   connect() {
     console.log("Message controller connected")
@@ -111,9 +111,9 @@ export default class extends Controller {
       this.decryptedContentTarget.innerHTML = decryptedContent
       this.decryptedContentTarget.style.display = "block"
 
-      // Hide the decrypt button if it exists
-      if (this.hasDecryptButtonTarget) {
-        this.decryptButtonTarget.style.display = "none"
+      // Hide the entire decrypt form (button and password input if present)
+      if (this.hasDecryptFormTarget) {
+        this.decryptFormTarget.style.display = "none"
       }
 
       // Notify server that the client successfully decrypted the message so it can decrement view count.
