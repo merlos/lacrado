@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import EncryptionHelper from "libs/encryption_helper"
 
 export default class extends Controller {
-  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent"]
+  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent", "password2Present"]
 
   connect() {
     console.log("Message controller connected")
@@ -18,6 +18,10 @@ export default class extends Controller {
 
     const content = this.contentTarget.value
     const password2 = this.password2Target.value || null
+    
+    console.log("Content length:", content.length)
+    console.log("Password2 raw value:", this.password2Target.value)
+    console.log("Password2 after null check:", password2)
 
     if (!content.trim()) {
       alert("Please enter a message")
@@ -57,12 +61,13 @@ export default class extends Controller {
       console.log("Password1 target name:", this.password1Target.name)
 
       // Set the hidden boolean flag to indicate password2 was provided (so server records requirement)
+      console.log("password2 value:", password2 ? `(${password2.length} chars)` : "null")
       if (password2) {
-        const flag = this.element.querySelector('input[name="message[password2_present]"]')
-        if (flag) {
-          flag.value = "true"
-          console.log("Set password2_present flag to true")
-        }
+        this.password2PresentTarget.value = "true"
+        console.log("Set password2_present flag to true")
+      } else {
+        this.password2PresentTarget.value = "false"
+        console.log("No password2 provided, flag set to false")
       }
 
       // Submit the form

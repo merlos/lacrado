@@ -34,6 +34,8 @@ class MessagesController < ApplicationController
         Rails.logger.info "encrypted_content length: #{encrypted_content&.length}"
         Rails.logger.info "encrypted_content value: #{encrypted_content.inspect}"
         Rails.logger.info "password1: #{password1.inspect}"
+        Rails.logger.info "password2_present (raw param): #{params[:password2_present].inspect}"
+        Rails.logger.info "password2_present (casted): #{password2_present.inspect}"
 
         # Validation
         if encrypted_content.blank?
