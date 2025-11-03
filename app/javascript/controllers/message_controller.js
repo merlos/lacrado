@@ -6,6 +6,16 @@ export default class extends Controller {
 
   connect() {
     this.debug("Message controller connected")
+    
+    // If on decrypt page, read password1 from URL hash and store it
+    if (this.hasPassword1Target && window.location.hash) {
+      // Remove the # from the hash
+      const password1FromHash = window.location.hash.substring(1)
+      if (password1FromHash) {
+        this.password1Target.value = password1FromHash
+        this.debug("Password1 loaded from URL hash")
+      }
+    }
   }
 
   // Helper method to log only in development
@@ -47,7 +57,7 @@ export default class extends Controller {
     }
 
     try {
-      // Generate password1 on client side
+      // Generate password1 on client side (keep it only in memory, never send to server)
       const password1 = EncryptionHelper.generateRandomString(16)
       this.debug("Generated password1:", password1)
 
@@ -63,11 +73,6 @@ export default class extends Controller {
       // Clear the original content to ensure server never sees plain text
       this.contentTarget.value = ""
 
-      // Set password1 in a hidden field so server can use it for URL generation
-      this.password1Target.value = password1
-      this.debug("Set password1 in form:", password1)
-      this.debug("Password1 target name:", this.password1Target.name)
-
       // Set the hidden boolean flag to indicate password2 was provided (so server records requirement)
       this.debug("password2 value:", password2 ? `(${password2.length} chars)` : "null")
       if (password2) {
@@ -78,18 +83,42 @@ export default class extends Controller {
         this.debug("No password2 provided, flag set to false")
       }
 
-      // Submit the form
+      // Submit the form via fetch to get JSON response
       this.debug("About to submit form")
-      this.debug("Form data before submit:")
       const formData = new FormData(this.formTarget)
+      
+      // Remove password1 from form data - server should never receive it
+      formData.delete('password1')
+      
+      this.debug("Form data before submit:")
       for (let [key, value] of formData.entries()) {
-        if (key.includes('encrypted') || key.includes('password1')) {
+        if (key.includes('encrypted')) {
           this.debug(`  ${key}: ${value.substring(0, 50)}...`)
         } else {
           this.debug(`  ${key}: ${value}`)
         }
       }
-      this.formTarget.submit()
+
+      const response = await fetch(this.formTarget.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Construct the URL client-side with password1 in the hash (so server never sees it)
+        const url = `${data.base_url}/${data.id}#${password1}`
+        // Redirect to created page with URL in query params (so we can display it)
+        window.location.href = `/messages/created?url=${encodeURIComponent(url)}&id=${data.id}`
+      } else {
+        const errorData = await response.json()
+        alert(`Failed to create message: ${errorData.errors?.join(', ') || 'Unknown error'}`)
+        submitButton.disabled = false
+        submitButton.value = "Create Secure Link"
+      }
     } catch (error) {
       console.error("Encryption failed:", error)
       alert("Failed to encrypt message. Please try again.")

@@ -17,11 +17,12 @@ Rails.application.routes.draw do
   id_regex = /[\w\-]{16}/   # Matches strings of 16 characters with letters, numbers, underscores, and dashes
   password1_regex = /[\w\-]{16}/  # Matches strings of exactly 16 characters with the same character set
 
-  # Displats the created message
-  get "/messages/:id/created", to: "messages#created", as: :created, constraints: { id: id_regex }
+  # Displays the created message
+  get "/messages/created", to: "messages#created", as: :created
 
   # when the user visits the link the client will decrypt locally
-  match "/:id/:password1", to: "messages#decrypt", via: [ :get, :post ], constraints: { id: id_regex, password1: password1_regex }, as: :decrypt
+  # password1 is in the URL hash (#password1) so server never sees it
+  match "/:id", to: "messages#decrypt", via: [ :get, :post ], constraints: { id: id_regex }, as: :decrypt
 
   # Client notifies server it successfully decrypted the message (no plaintext sent)
   post "/:id/mark_viewed", to: "messages#mark_viewed", constraints: { id: id_regex }

@@ -51,7 +51,6 @@
         </div>
     </fieldset>
     <%= f.hidden_field :encrypted_content, data: { message_target: "encryptedContent" } %>
-    <%= f.hidden_field :password1, data: { message_target: "password1" } %>
     <%= f.submit "Create Secure Link", class: 'btn btn-primary' %>
     </div>
   <% end %>

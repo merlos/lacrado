@@ -23,7 +23,8 @@
                 </div>
 
     <input type="hidden" data-message-target="encryptedContent" value="<%= @encrypted_content %>">
-    <input type="hidden" data-message-target="password1" value="<%= @password1 %>">
+    <!-- password1 is read from URL hash by JavaScript, never sent to server -->
+    <input type="hidden" data-message-target="password1" value="">
     <input type="hidden" id="message-id" value="<%= @message.id %>">
 
     <% else %>

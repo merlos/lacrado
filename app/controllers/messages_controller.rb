@@ -4,25 +4,22 @@ class MessagesController < ApplicationController
     end
 
     def created
-        id = params[:id]
-        if session[:password1].nil?
+        # The URL is constructed client-side and passed as a parameter
+        # This way the server never sees password1
+        @url = params[:url]
+        @message = Message.find_by(id: params[:id])
+        
+        if @url.blank? || @message.nil?
             redirect_to new_message_path
             return
         end
-        password1 = session[:password1]
-        # clear the password1 from the session
-        session[:password1] = nil
-        @message = Message.find_by(id: params[:id])
-        if @message
-            @url = "#{request.base_url}/#{id}/#{password1}"
-            render :created
-        end
+        
+        render :created
     end
 
 
     def create
         encrypted_content = params[:encrypted_content]
-        password1 = params[:password1]
         views = params[:views_remaining].to_i
         expiration = params[:expiration_time]
         # password2 itself should NEVER be submitted; only a boolean flag indicates presence
@@ -32,19 +29,12 @@ class MessagesController < ApplicationController
         Rails.logger.info "=== CREATE MESSAGE DEBUG ==="
         Rails.logger.info "encrypted_content present: #{encrypted_content.present?}"
         Rails.logger.info "encrypted_content length: #{encrypted_content&.length}"
-        Rails.logger.info "encrypted_content value: #{encrypted_content.inspect}"
-        Rails.logger.info "password1: #{password1.inspect}"
         Rails.logger.info "password2_present (raw param): #{params[:password2_present].inspect}"
         Rails.logger.info "password2_present (casted): #{password2_present.inspect}"
 
         # Validation
         if encrypted_content.blank?
             render plain: "Encrypted content is required", status: :unprocessable_entity
-            return
-        end
-
-        if password1.blank? || password1.length != 16
-            render plain: "Invalid password1", status: :unprocessable_entity
             return
         end
 
@@ -71,11 +61,10 @@ class MessagesController < ApplicationController
         )
 
         if @message.save
-            session[:password1] = password1
-            redirect_to created_path(@message.id)
-            nil
+            # Return JSON with message ID so client can construct the URL with password1
+            render json: { id: @message.id, base_url: request.base_url }
         else
-            render :new, status: :unprocessable_entity
+            render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
         end
     end
 
@@ -94,11 +83,11 @@ class MessagesController < ApplicationController
 
     def decrypt
         @message = Message.find_by(id: params[:id])
-        @password1 = params[:password1]
 
         if @message
             # Pass encrypted content to view for client-side decryption
             @encrypted_content = @message.encrypted_content
+            # password1 will be read from URL hash (#) by JavaScript, server never sees it
 
             # Note: view count is NOT decremented here - it will be decremented
             # by mark_viewed action after successful client-side decryption
