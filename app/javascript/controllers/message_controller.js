@@ -2,18 +2,31 @@ import { Controller } from "@hotwired/stimulus"
 import EncryptionHelper from "libs/encryption_helper"
 
 export default class extends Controller {
-  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent", "password2Present", "decryptForm"]
+  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password1Input", "password1InputContainer", "password2Input", "password2InputContainer", "decryptButton", "decryptedContent", "password2Present", "decryptForm"]
 
   connect() {
     this.debug("Message controller connected")
     
-    // If on decrypt page, read password1 from URL hash and store it
-    if (this.hasPassword1Target && window.location.hash) {
-      // Remove the # from the hash
-      const password1FromHash = window.location.hash.substring(1)
-      if (password1FromHash) {
+    // If on decrypt page, check if password1 is in URL hash
+    if (this.hasPassword1Target) {
+      const password1FromHash = window.location.hash ? window.location.hash.substring(1) : null
+      
+      if (password1FromHash && password1FromHash.length === 16) {
+        // Password1 is in URL hash - store it and hide the input field
         this.password1Target.value = password1FromHash
         this.debug("Password1 loaded from URL hash")
+        
+        // Hide password1 input container if it exists
+        if (this.hasPassword1InputContainerTarget) {
+          this.password1InputContainerTarget.style.display = 'none'
+        }
+      } else {
+        // No password1 in URL - show the input field so user can enter it
+        this.debug("No password1 in URL hash - user must provide it")
+        
+        if (this.hasPassword1InputContainerTarget) {
+          this.password1InputContainerTarget.style.display = 'block'
+        }
       }
     }
   }
@@ -134,12 +147,33 @@ export default class extends Controller {
     event.preventDefault()
 
     const encryptedContent = this.encryptedContentTarget.value
-    const password1 = this.password1Target.value
+    
+    // Get password1 from either: 
+    // 1. Hidden field (if it was in URL hash)
+    // 2. User input field (if user had to enter it manually)
+    let password1 = this.password1Target.value
+    
+    if (!password1 && this.hasPassword1InputTarget) {
+      password1 = this.password1InputTarget.value
+      // Store it in the hidden field for consistency
+      this.password1Target.value = password1
+    }
+    
     // Use hasPassword2InputTarget to check if the target exists before accessing it
     const password2 = this.hasPassword2InputTarget ? this.password2InputTarget.value : null
 
-    if (!encryptedContent || !password1) {
-      alert("Missing encrypted content or password1")
+    if (!encryptedContent) {
+      alert("Missing encrypted content")
+      return
+    }
+    
+    if (!password1) {
+      alert("Please enter the encryption key (password1)")
+      return
+    }
+    
+    if (password1.length !== 16) {
+      alert("Encryption key (password1) must be exactly 16 characters")
       return
     }
 

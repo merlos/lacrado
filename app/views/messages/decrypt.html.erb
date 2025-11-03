@@ -1,5 +1,5 @@
 <div class="container" data-controller="message">
-    <h1>lacrado message</h1>
+    <h1>lacrado private message</h1>
     
 <% if @message && @message.views_remaining > 1 %>
         <p>Note that message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>.</p>
@@ -10,16 +10,27 @@
     
         <div data-message-target="decryptedContent" style="display: none;"></div>
 
-                <!-- If password2 is present, the client will ask for it and decrypt locally; password2 is never submitted to the server -->
+                <!-- Decrypt form - shows password1 input if not in URL hash -->
                 <div data-message-target="decryptForm">
-                    <% if @message.password2_present %>
-                        <label>Password*:</label>
+                    <!-- Password1 input (shown only if not in URL hash) -->
+                    <div data-message-target="password1InputContainer" style="display: none;">
+                        <label>Encryption Key (password1)*:</label>
                         <br>
-                        <input type="password" minlength="10" placeholder="**********" maxlength="64" required data-message-target="password2Input" id="decrypt-password2">
-                        <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
-                    <% else %>
-                        <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
+                        <input type="text" minlength="16" maxlength="16" placeholder="16-character key" required data-message-target="password1Input" id="decrypt-password1">
+                        <br><br>
+                    </div>
+                    
+                    <!-- Password2 input (shown only if password2_present flag is true) -->
+                    <% if @message.password2_present %>
+                        <div data-message-target="password2InputContainer">
+                            <label>Password (password2)*:</label>
+                            <br>
+                            <input type="password" minlength="10" placeholder="**********" maxlength="64" required data-message-target="password2Input" id="decrypt-password2">
+                            <br><br>
+                        </div>
                     <% end %>
+                    
+                    <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
                 </div>
 
     <input type="hidden" data-message-target="encryptedContent" value="<%= @encrypted_content %>">

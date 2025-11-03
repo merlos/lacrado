@@ -1,5 +1,5 @@
 <div class="container" data-controller="message">
-<h1>New lacrado self-destroying message</h1>
+<h1>New lacrado self-destroying private message</h1>
 <%= form_with url: messages_path, method: :post, format: :html, data: { message_target: "form", turbo: false, action: "submit->message#create" } do |f| %>
     <div>
     <label>Message content*:</label>
