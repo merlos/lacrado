@@ -109,10 +109,12 @@ export default class extends Controller {
 
       if (response.ok) {
         const data = await response.json()
-        // Construct the URL client-side with password1 in the hash (so server never sees it)
-        const url = `${data.base_url}/${data.id}#${password1}`
-        // Redirect to created page with URL in query params (so we can display it)
-        window.location.href = `/messages/created?url=${encodeURIComponent(url)}&id=${data.id}`
+        // Store password1 and message ID in sessionStorage (never send to server)
+        sessionStorage.setItem('created_password1', password1)
+        sessionStorage.setItem('created_message_id', data.id)
+        sessionStorage.setItem('created_base_url', data.base_url)
+        // Redirect to created page without password1
+        window.location.href = `/messages/created?id=${data.id}`
       } else {
         const errorData = await response.json()
         alert(`Failed to create message: ${errorData.errors?.join(', ') || 'Unknown error'}`)

@@ -6,7 +6,7 @@
 </p>
 <div class="power-link-container">
   <h3 class="power-link">
-    <span id="content-to-copy"><%= @url %></span>
+    <span id="content-to-copy"></span>
     <a href="#" id="copy-link">📋 Copy to Clipboard</a>
   </h3>
 </div>
@@ -24,6 +24,27 @@ It will be destroyed <strong class="highlight">after being viewed <%= @message.v
 
 
 </div> <!-- /container -->
+
+<!-- Construct URL client-side from sessionStorage -->
+<script>
+// Construct the URL with password1 from sessionStorage (never sent to server)
+const password1 = sessionStorage.getItem('created_password1');
+const messageId = sessionStorage.getItem('created_message_id');
+const baseUrl = sessionStorage.getItem('created_base_url');
+
+if (password1 && messageId && baseUrl) {
+  const url = `${baseUrl}/${messageId}#${password1}`;
+  document.getElementById('content-to-copy').textContent = url;
+  
+  // Clear sessionStorage after using
+  sessionStorage.removeItem('created_password1');
+  sessionStorage.removeItem('created_message_id');
+  sessionStorage.removeItem('created_base_url');
+} else {
+  // If sessionStorage is empty, redirect to home
+  window.location.href = '/messages/new';
+}
+</script>
 
 <!-- copy to clipboard -->
 <script>
