@@ -359,3 +359,23 @@ fieldset {
    opacity: 0.03;
    pointer-events: none;
  }
+
+ /* Decrypt page navigation links */
+ .decrypt-page-links {
+   margin-top: 2em;
+   text-align: center;
+ }
+
+ .decrypt-page-links p {
+   color: #666;
+   font-size: 0.9em;
+ }
+
+ .decrypt-page-links a {
+   color: #007bff;
+   text-decoration: none;
+ }
+
+ .decrypt-page-links a:hover {
+   text-decoration: underline;
+ }

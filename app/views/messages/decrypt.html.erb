@@ -42,4 +42,12 @@
     <% else %>
         <p><strong class="alert-error">This message has been self-destroyed</strong>. The link won't work anymore. Please, save in a secure way any important information from this message.</p>
     <% end %>
+
+    <!-- Navigation links -->
+    <div class="decrypt-page-links">
+        <p>
+            <%= link_to 'What is lacrado?', root_path %> | 
+            <%= link_to 'Create a secure message', new_message_path %>
+        </p>
+    </div>
 </div>
