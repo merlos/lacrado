@@ -2,9 +2,10 @@
     <h1>lacrado private message</h1>
     
 <% if @message && @message.views_remaining > 1 %>
-        <p>Note that message can be viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> and until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>.</p>
+        <p>This message will be deleted after being viewed <strong class="highlight"><%= pluralize(@message.views_remaining, 'more time') %></strong> or after <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>, whichever comes first.</p>
 <% else %>
-        <p>The message will be <strong>deleted after decrypting</strong>. You can decrypt it until <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>.</p>
+        <p>This message will be <strong class="highlight">deleted after being viewed</strong> or after  
+        <strong class="highlight"><%= @message.expiration_time.strftime("%A, %B %e, %Y at %l:%M %p") %></strong>, whichever comes first.</p>
 <% end %>
 <% if @message && @message.views_remaining > 0 %>
     
@@ -30,7 +31,7 @@
                         </div>
                     <% end %>
                     
-                    <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">Decrypt message</button>
+                    <button data-action="message#decrypt" data-message-target="decryptButton" class="btn btn-primary">View message</button>
                 </div>
 
     <input type="hidden" data-message-target="encryptedContent" value="<%= @encrypted_content %>">
