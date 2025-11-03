@@ -5,7 +5,15 @@ export default class extends Controller {
   static targets = ["content", "password2", "form", "encryptedContent", "password1", "password2Input", "decryptButton", "decryptedContent", "password2Present", "decryptForm"]
 
   connect() {
-    console.log("Message controller connected")
+    this.debug("Message controller connected")
+  }
+
+  // Helper method to log only in development
+  debug(...args) {
+    const isDevelopment = document.querySelector('meta[name="env"]')?.content === 'development'
+    if (isDevelopment) {
+      console.log(...args)
+    }
   }
 
   // Handle form submission for creating a message
@@ -19,9 +27,9 @@ export default class extends Controller {
     const content = this.contentTarget.value
     const password2 = this.password2Target.value || null
     
-    console.log("Content length:", content.length)
-    console.log("Password2 raw value:", this.password2Target.value)
-    console.log("Password2 after null check:", password2)
+    this.debug("Content length:", content.length)
+    this.debug("Password2 raw value:", this.password2Target.value)
+    this.debug("Password2 after null check:", password2)
 
     if (!content.trim()) {
       alert("Please enter a message")
@@ -41,44 +49,44 @@ export default class extends Controller {
     try {
       // Generate password1 on client side
       const password1 = EncryptionHelper.generateRandomString(16)
-      console.log("Generated password1:", password1)
+      this.debug("Generated password1:", password1)
 
       // Encrypt the message
       const encryptedContent = await EncryptionHelper.encryptor(content, password1, password2)
-      console.log("Encrypted content length:", encryptedContent.length)
+      this.debug("Encrypted content length:", encryptedContent.length)
 
       // Set the encrypted content in a hidden field
       this.encryptedContentTarget.value = encryptedContent
-      console.log("Set encrypted content in form, value:", this.encryptedContentTarget.value.substring(0, 50) + "...")
-      console.log("Encrypted content target name:", this.encryptedContentTarget.name)
+      this.debug("Set encrypted content in form, value:", this.encryptedContentTarget.value.substring(0, 50) + "...")
+      this.debug("Encrypted content target name:", this.encryptedContentTarget.name)
 
       // Clear the original content to ensure server never sees plain text
       this.contentTarget.value = ""
 
       // Set password1 in a hidden field so server can use it for URL generation
       this.password1Target.value = password1
-      console.log("Set password1 in form:", password1)
-      console.log("Password1 target name:", this.password1Target.name)
+      this.debug("Set password1 in form:", password1)
+      this.debug("Password1 target name:", this.password1Target.name)
 
       // Set the hidden boolean flag to indicate password2 was provided (so server records requirement)
-      console.log("password2 value:", password2 ? `(${password2.length} chars)` : "null")
+      this.debug("password2 value:", password2 ? `(${password2.length} chars)` : "null")
       if (password2) {
         this.password2PresentTarget.value = "true"
-        console.log("Set password2_present flag to true")
+        this.debug("Set password2_present flag to true")
       } else {
         this.password2PresentTarget.value = "false"
-        console.log("No password2 provided, flag set to false")
+        this.debug("No password2 provided, flag set to false")
       }
 
       // Submit the form
-      console.log("About to submit form")
-      console.log("Form data before submit:")
+      this.debug("About to submit form")
+      this.debug("Form data before submit:")
       const formData = new FormData(this.formTarget)
       for (let [key, value] of formData.entries()) {
         if (key.includes('encrypted') || key.includes('password1')) {
-          console.log(`  ${key}: ${value.substring(0, 50)}...`)
+          this.debug(`  ${key}: ${value.substring(0, 50)}...`)
         } else {
-          console.log(`  ${key}: ${value}`)
+          this.debug(`  ${key}: ${value}`)
         }
       }
       this.formTarget.submit()
