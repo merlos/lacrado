@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import EncryptionHelper from "libs/encryption_helper"
 
 export default class extends Controller {
-  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password1Input", "password1InputContainer", "password2Input", "password2InputContainer", "decryptButton", "decryptedContent", "password2Present", "decryptForm"]
+  static targets = ["content", "password2", "form", "encryptedContent", "password1", "password1Input", "password1InputContainer", "password2Input", "password2InputContainer", "decryptButton", "decryptedContent", "password2Present", "decryptForm", "statusMessage", "viewsCount", "initialViews", "expirationTime"]
 
   connect() {
     this.debug("Message controller connected")
@@ -189,6 +189,9 @@ export default class extends Controller {
         this.decryptFormTarget.style.display = "none"
       }
 
+      // Update status message after decryption
+      this.updateStatusMessage()
+
       // Notify server that the client successfully decrypted the message so it can decrement view count.
       try {
         const messageId = document.getElementById('message-id')?.value
@@ -205,6 +208,26 @@ export default class extends Controller {
     } catch (error) {
       console.error("Decryption failed:", error)
       alert("Failed to decrypt message. Please check your passwords.")
+    }
+  }
+
+  // Update the status message after decryption
+  updateStatusMessage() {
+    if (!this.hasStatusMessageTarget || !this.hasInitialViewsTarget) {
+      return
+    }
+
+    const initialViews = parseInt(this.initialViewsTarget.textContent)
+    const remainingViews = initialViews - 1
+    const expirationTime = this.hasExpirationTimeTarget ? this.expirationTimeTarget.textContent : ''
+
+    if (remainingViews <= 0) {
+      // Message was destroyed
+      this.statusMessageTarget.innerHTML = '<strong class="message-destroyed">The message has been destroyed</strong>. The link won\'t work anymore. Copy any important content and keep it in a secure location.'
+    } else {
+      // Message still has views remaining
+      const viewsText = remainingViews === 1 ? '1 more time' : `${remainingViews} more times`
+      this.statusMessageTarget.innerHTML = `This message can be viewed <strong class="highlight"><span>${viewsText}</span></strong> or until <strong class="highlight">${expirationTime}</strong>, whichever comes first.`
     }
   }
 }

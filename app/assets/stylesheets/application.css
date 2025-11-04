@@ -326,6 +326,14 @@ fieldset {
    border-radius: 2px; /* Optional: Slightly round the edges */
  }
 
+ .message-destroyed {
+   background-color: #ffcccc; /* Light red/pink color */
+   color: #cc0000; /* Dark red text */
+   padding: 0 4px;
+   border-radius: 2px;
+   font-weight: bold;
+ }
+
  /* Decrypted message paper style */
  .decrypted-message-paper {
    background-color: #f9f7f1; /* Slightly off-white paper color */
