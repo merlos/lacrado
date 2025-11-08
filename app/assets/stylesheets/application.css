@@ -325,3 +325,65 @@ fieldset {
    padding: 0 2px; /* Optional: Adds a slight padding for better marker effect */
    border-radius: 2px; /* Optional: Slightly round the edges */
  }
+
+ .message-destroyed {
+   background-color: #ffcccc; /* Light red/pink color */
+   color: #cc0000; /* Dark red text */
+   padding: 0 4px;
+   border-radius: 2px;
+   font-weight: bold;
+ }
+
+ /* Decrypted message paper style */
+ .decrypted-message-paper {
+   background-color: #f9f7f1; /* Slightly off-white paper color */
+   font-family: 'Courier New', 'Courier', monospace;
+   font-size: 1.2em;
+   line-height: 1.5em;
+   padding: 2em;
+   margin: 2em 0;
+   border: 1px solid #d0cdc1;
+   border-radius: 4px;
+   box-shadow: 
+     0 1px 3px rgba(0,0,0,0.12),
+     0 1px 2px rgba(0,0,0,0.24),
+     inset 0 0 50px rgba(0,0,0,0.02);
+   color: #2c2c2c;
+   white-space: pre-wrap; /* Preserve whitespace and line breaks */
+   word-wrap: break-word; /* Break long words */
+   max-width: 100%;
+   overflow-wrap: break-word;
+ }
+
+ /* Add a subtle texture effect */
+ .decrypted-message-paper::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAJElEQVQYV2NkYGD4z8DAwMgABXABRiYGBgY0SRgfxocJwAQBABJuAwV4RQwuAAAAAElFTkSuQmCC');
+   opacity: 0.03;
+   pointer-events: none;
+ }
+
+ /* Decrypt page navigation links */
+ .decrypt-page-links {
+   margin-top: 2em;
+   text-align: center;
+ }
+
+ .decrypt-page-links p {
+   color: #666;
+   font-size: 0.9em;
+ }
+
+ .decrypt-page-links a {
+   color: #007bff;
+   text-decoration: none;
+ }
+
+ .decrypt-page-links a:hover {
+   text-decoration: underline;
+ }

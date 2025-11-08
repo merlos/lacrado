@@ -1,6 +1,4 @@
 class Message < ApplicationRecord
-    include EncryptionHelper
-
     after_create :schedule_expiration_job
 
     MAX_ALLOWED_TIME = 1.year + 1.day
@@ -43,5 +41,10 @@ class Message < ApplicationRecord
         random_id = generate_random_string(16)
         break random_id unless Message.exists?(id: random_id)
       end
+    end
+
+    def generate_random_string(length = 16)
+      chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a + [ "-", "_" ]
+      Array.new(length) { chars[SecureRandom.random_number(chars.size)] }.join
     end
 end

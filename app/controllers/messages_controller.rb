@@ -1,44 +1,42 @@
 class MessagesController < ApplicationController
-        include EncryptionHelper
-
     def new
         @message = Message.new
     end
 
     def created
-        id = params[:id]
-        if session[:password1].nil?
+        # The URL will be constructed entirely client-side using sessionStorage
+        # Server never sees password1
+        @message = Message.find_by(id: params[:id])
+
+        if @message.nil?
             redirect_to new_message_path
             return
         end
-        password1 = session[:password1]
-        # clear the password1 from the session
-        session[:password1] = nil
-        @message = Message.find_by(id: params[:id])
-        if @message
-            @url = "#{request.base_url}/#{id}/#{password1}"
-            render :created
-        end
+
+        render :created
     end
 
 
     def create
-        password1 = generate_random_string
-        message = params[:content]
+        encrypted_content = params[:encrypted_content]
         views = params[:views_remaining].to_i
         expiration = params[:expiration_time]
-        password2 = params[:password2]
+        # password2 itself should NEVER be submitted; only a boolean flag indicates presence
+        password2_present = ActiveModel::Type::Boolean.new.cast(params[:password2_present])
+
+        # Debug logging
+        Rails.logger.info "=== CREATE MESSAGE DEBUG ==="
+        Rails.logger.info "encrypted_content present: #{encrypted_content.present?}"
+        Rails.logger.info "encrypted_content length: #{encrypted_content&.length}"
+        Rails.logger.info "password2_present (raw param): #{params[:password2_present].inspect}"
+        Rails.logger.info "password2_present (casted): #{password2_present.inspect}"
 
         # Validation
-        # password2 is not part of the model, and optional to be filled
-        # however if password2 is present, it should be at least 10 characters long
-        # and max 64 characters long
-        if password2.present? && (password2.length < 10 || password2.length > 64)
-            render plain: "Password2 must be between 10 and 64 characters long", status: :unprocessable_entity
+        if encrypted_content.blank?
+            render plain: "Encrypted content is required", status: :unprocessable_entity
             return
         end
 
-        encrypted_content = encryptor(message, password1, password2)
         expiration_time = case expiration
         when "1_hour" then 1.hour.from_now
         when "3_hours" then 3.hours.from_now
@@ -47,6 +45,7 @@ class MessagesController < ApplicationController
         when "1_day" then 1.day.from_now
         when "3_days" then 3.days.from_now
         when "7_days" then 7.days.from_now
+        when "15_days" then 15.days.from_now
         when "1_month" then 1.month.from_now
         when "1_year" then 1.year.from_now
         when "never" then nil
@@ -57,92 +56,43 @@ class MessagesController < ApplicationController
             encrypted_content: encrypted_content,
             expiration_time: expiration_time,
             views_remaining: views,
-            password2_present: password2.present?
+            password2_present: password2_present
         )
 
         if @message.save
-            session[:password1] = password1
-            redirect_to created_path(@message.id)
-            nil
+            # Return JSON with message ID so client can construct the URL with password1
+            render json: { id: @message.id, base_url: request.base_url }
         else
-            # puts "Error saving message: #{@message.errors.full_messages.join(', ')}"
-            render :new, status: :unprocessable_entity
+            render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
         end
     end
 
-    def get_password2
-        @id = params[:id]
-        @password1 = params[:password1]
-        render :get_password2
-    end
-
-    def decrypted
-        @message = Message.find_by(id: params[:id])
-        password1 = params[:password1]
-        if @message
-            # ensure password2 is required
-            if not @message.password2_present
-                redirect_to decrypt_path(id: @message.id, password1: password1)
-                return
-            end
-            # ensure password2 has been previously stored in the session
-            if not session[:password2].present?
-                redirect_to get_password2_path(id: @message.id, password1: password1)
-                return
-            end
-            password2 = session[:password2]
-            # clear the password2 from the session
-            session[:password2] = nil
-            # now try to decrtpy
-            begin
-                @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
+        # Called by the client AFTER a successful client-side decryption to decrement views_remaining
+        # The client must not send any plaintext or password2 here — only the message id.
+        def mark_viewed
+            @message = Message.find_by(id: params[:id])
+            if @message
                 @message.update(views_remaining: @message.views_remaining - 1)
                 @message.destroy if @message.views_remaining <= 0
-                render :decrypt
-                nil
-            rescue StandardError => e
-                flash[:error] = "Incorrect password"
-                redirect_to get_password2_path(id: @message.id, password1: password1)
+                head :ok
+            else
+                head :not_found
             end
-        else
-            render plain: "Message not found", status: :not_found
         end
-    end
 
     def decrypt
         @message = Message.find_by(id: params[:id])
-        password1 = params[:password1]
-        password2 = params[:password2]
 
         if @message
-            # display message to debug
-            # puts @message.inspect
-            # puts "Needs password2 & password2 present?", @message.password2_present, password2.present?
+            # Pass encrypted content to view for client-side decryption
+            @encrypted_content = @message.encrypted_content
+            # password1 will be read from URL hash (#) by JavaScript, server never sees it
 
-            # First check if password2 is required and not present
-            if @message.password2_present && !password2.present?
-                redirect_to get_password2_path(id: @message.id, password1: password1)
-                return
-            end
+            # Note: view count is NOT decremented here - it will be decremented
+            # by mark_viewed action after successful client-side decryption
 
-            # Now decrypt the message
-            begin
-                @decrypted_content = decryptor(@message.encrypted_content, password1, password2)
-                #
-                if password2.present?
-                    session[:password2] = password2
-                    redirect_to decrypted_path(id: @message.id, password1: password1)
-                    return
-                end
-                @message.update(views_remaining: @message.views_remaining - 1)
-                @message.destroy if @message.views_remaining <= 0
-                # puts @message.created_at
-                render :decrypt
-                nil
-            rescue StandardError => e
-                flash[:error] = "Incorrect password"
-                redirect_to get_password2_path(id: @message.id, password1: password1)
-            end
+            render :decrypt
+            nil
         else
             render plain: "Message not found", status: :not_found
         end
