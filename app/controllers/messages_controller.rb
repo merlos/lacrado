@@ -7,12 +7,12 @@ class MessagesController < ApplicationController
         # The URL will be constructed entirely client-side using sessionStorage
         # Server never sees password1
         @message = Message.find_by(id: params[:id])
-        
+
         if @message.nil?
             redirect_to new_message_path
             return
         end
-        
+
         render :created
     end
 
